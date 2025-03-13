@@ -97,7 +97,7 @@ resource appServiceApp 'Microsoft.Web/sites@2020-06-01' = {
 
 resource toyManualsStorageAccount 'Microsoft.Storage/storageAccounts@2022-09-01' = if (deployToyManualsStorageAccount) {
   name: storageAccountName
-  location: location
+  location: locatio
   kind: 'StorageV2'
   sku: {
     name: environmentConfigurationMap[environmentType].toyManualsStorageAccount.sku.name
