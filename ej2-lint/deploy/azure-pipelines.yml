@@ -55,7 +55,7 @@ stages:
           inlineScript: |
             az deployment group what-if \
               --resource-group $(ResourceGroupName) \
-              --template-file deploy/main.bicep \
+              --template-file ej2-lint/deploy/main.bicep \
               --parameters environmentType=$(EnvironmentType)
 
 - stage: Deploy
@@ -77,6 +77,6 @@ stages:
                 deploymentName: $(Build.BuildNumber)
                 location: $(deploymentDefaultLocation)
                 resourceGroupName: $(ResourceGroupName)
-                csmFile: deploy/main.bicep
+                csmFile: ej2-lint/deploy/main.bicep
                 overrideParameters: >
                   -environmentType $(EnvironmentType)
