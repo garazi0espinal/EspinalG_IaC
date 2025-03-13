@@ -102,7 +102,7 @@ stages:
           targetType: inline
           script: |
             $container = New-PesterContainer `
-              -Path 'ej2-lint/deploy/Website.Test.ps1' `
+              -Path 'ej2-lint/deploy/Website.Tests.ps1' `
               -Data @{ HostName = '$(appServiceAppHostName)' }
             Invoke-Pester `
               -Container $container `
