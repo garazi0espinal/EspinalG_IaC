@@ -36,7 +36,7 @@ stages:
           location: $(deploymentDefaultLocation)
           deploymentMode: Validation
           resourceGroupName: $(ResourceGroupName)
-          csmFile: deploy/main.bicep
+          csmFile: ej2 - lint/deploy/main.bicep
           overrideParameters: >
             -environmentType $(EnvironmentType)
 
@@ -52,6 +52,6 @@ stages:
           deploymentName: $(Build.BuildNumber)
           location: $(DeploymentDefaultLocation)
           resourceGroupName: $(ResourceGroupName)
-          csmFile: deploy/main.bicep
+          csmFile: ej2 - lint/deploy/main.bicep
           overrideParameters: >
             -environmentType $(EnvironmentType)
