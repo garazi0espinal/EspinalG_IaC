@@ -68,6 +68,7 @@ stages:
         deploy:
           steps:
             - checkout: self
+
             - task: AzureResourceManagerTemplateDeployment@3
               name: DeployBicepFile
               displayName: Deploy Bicep file
