@@ -18,7 +18,6 @@ param resourceNameSuffix string = uniqueString(resourceGroup().id)
 var appServiceAppName = 'toy-website-${resourceNameSuffix}'
 var appServicePlanName = 'toy-website'
 var applicationInsightsInstanceName = 'toywebsite'
-//var logAnalyticsWorkspaceName = 'workspace-${resourceNameSuffix}'
 var storageAccountName = 'mystorage${resourceNameSuffix}'
 
 // Define the SKUs for each component based on the environment type.
@@ -61,7 +60,8 @@ resource appServicePlan 'Microsoft.Web/serverFarms@2020-06-01' = {
   name: appServicePlanName
   location: location
   sku: {
-    name: environmentConfigurationMap[environmentType].appServicePlan.sku
+    name: environmentConfigurationMap[environmentType].appServicePlan.sku.name
+    capacity: environmentConfigurationMap[environmentType].appServicePlan.sku.capacity
   }
 }
 
@@ -99,5 +99,7 @@ resource toyManualsStorageAccount 'Microsoft.Storage/storageAccounts@2022-09-01'
   name: storageAccountName
   location: location
   kind: 'StorageV2'
-  sku: environmentConfigurationMap[environmentType].storageAccountName.sku
+  sku: {
+    name: environmentConfigurationMap[environmentType].toyManualsStorageAccount.sku.name
+  }
 }
