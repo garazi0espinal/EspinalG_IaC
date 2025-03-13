@@ -19,11 +19,7 @@ stages:
     displayName: Lint code
     steps:
       - script: |
-          echo "Listing files in the current directory:"
-          ls -la
-          echo "Building Bicep file:"
           az bicep build --file ej2-lint/deploy/main.bicep
-          echo "Bicep file build"
         name: LintBicepCode
         displayName: Run Bicep linter
 

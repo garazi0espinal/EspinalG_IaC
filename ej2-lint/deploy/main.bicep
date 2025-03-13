@@ -1,20 +1,66 @@
 @description('The Azure region into which the resources should be deployed.')
 param location string = resourceGroup().location
 
-@description('The name of the App Service app.')
-param appServiceAppName string = 'toywebsite${uniqueString(resourceGroup().id)}'
+@description('The type of environment. This must be nonprod or prod.')
+@allowed([
+  'nonprod'
+  'prod'
+])
+param environmentType string
 
-@description('The name of the App Service plan SKU.')
-param appServicePlanSkuName string = 'F1'
+@description('Indicates whether to deploy the storage account for toy manuals.')
+param deployToyManualsStorageAccount bool
 
+@description('A unique suffix to add to resource names that need to be globally unique.')
+@maxLength(13)
+param resourceNameSuffix string = uniqueString(resourceGroup().id)
+
+var appServiceAppName = 'toy-website-${resourceNameSuffix}'
 var appServicePlanName = 'toy-website-plan'
 var applicationInsightsInstanceName = 'toy-website-insights'
+var storageAccountName = 'mystorage${resourceNameSuffix}'
+
+// Define the SKUs for each component based on the environment type.
+var environmentConfigurationMap = {
+  nonprod: {
+    appServiceApp: {
+      alwaysOn: false
+    }
+    appServicePlan: {
+      sku: {
+        name: 'F1'
+        capacity: 1
+      }
+    }
+    toyManualsStorageAccount: {
+      sku: {
+        name: 'Standard_LRS'
+      }
+    }
+  }
+  prod: {
+    appServiceApp: {
+      alwaysOn: true
+    }
+    appServicePlan: {
+      sku: {
+        name: 'S1'
+        capacity: 2
+      }
+    }
+    toyManualsStorageAccount: {
+      sku: {
+        name: 'Standard_ZRS'
+      }
+    }
+  }
+}
 
 resource appServicePlan 'Microsoft.Web/serverFarms@2020-06-01' = {
   name: appServicePlanName
   location: location
   sku: {
-    name: appServicePlanSkuName
+    name: environmentConfigurationMap[environmentType].appServicePlan.sku
   }
 }
 
@@ -46,4 +92,11 @@ resource appServiceApp 'Microsoft.Web/sites@2020-06-01' = {
       ]
     }
   }
+}
+
+resource toyManualsStorageAccount 'Microsoft.Storage/storageAccounts@2022-09-01' = if (deployToyManualsStorageAccount) {
+  name: storageAccountName
+  location: location
+  kind: 'StorageV2'
+  sku: environmentConfigurationMap[environmentType].storageAccountName.sku
 }
