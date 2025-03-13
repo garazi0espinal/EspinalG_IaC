@@ -39,19 +39,44 @@ stages:
           csmFile: ej2-lint/deploy/main.bicep
           overrideParameters: >
             -environmentType $(EnvironmentType)
+  
+- stage: Preview
+  jobs:
+  - job: PreviewAzureChanges
+    displayName: Preview Azure changes
+    steps:
+      - task: AzureCLI@2
+        name: RunWhatIf
+        displayName: Run what-if
+        inputs:
+          azureSubscription: $(ServiceConnectionName)
+          scriptType: 'bash'
+          scriptLocation: 'inlineScript'
+          inlineScript: |
+            az deployment group what-if \
+              --resource-group $(ResourceGroupName) \
+              --template-file deploy/main.bicep \
+              --parameters environmentType=$(EnvironmentType)
 
 - stage: Deploy
   jobs:
-  - job: Deploy
-    steps:
-      - task: AzureResourceManagerTemplateDeployment@3
-        name: Deploy
-        displayName: Deploy to Azure
-        inputs:
-          connectedServiceName: $(ServiceConnectionName)
-          deploymentName: $(Build.BuildNumber)
-          location: $(DeploymentDefaultLocation)
-          resourceGroupName: $(ResourceGroupName)
-          csmFile: ej2-lint/deploy/main.bicep
-          overrideParameters: >
-            -environmentType $(EnvironmentType)
+  - deployment: DeployWebsite
+    displayName: Deploy website
+    environment: Website
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+            - checkout: self
+
+            - task: AzureResourceManagerTemplateDeployment@3
+              name: DeployBicepFile
+              displayName: Deploy Bicep file
+              inputs:
+                connectedServiceName: $(ServiceConnectionName)
+                deploymentName: $(Build.BuildNumber)
+                location: $(deploymentDefaultLocation)
+                resourceGroupName: $(ResourceGroupName)
+                csmFile: deploy/main.bicep
+                overrideParameters: >
+                  -environmentType $(EnvironmentType)
