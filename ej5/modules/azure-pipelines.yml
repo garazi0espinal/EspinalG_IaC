@@ -17,9 +17,9 @@ variables:
 - name: ModuleRegistryServer
   value: yourregistryname.azurecr.io
 - name: ModuleFilePath
-  value: modules/storage-account/main.bicep
+  value: ej5/modules/main.bicep
 - name: ModuleMetadataFilePath
-  value: modules/storage-account/metadata.json
+  value: ej5/modules/main.bicep
 
 pool:
   vmImage: ubuntu-latest
