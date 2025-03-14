@@ -91,11 +91,11 @@ resource appServiceApp 'Microsoft.Web/sites@2022-03-01' = {
       appSettings: [
         {
           name: 'APPINSIGHTS_INSTRUMENTATIONKEY'
-          value: applicationInsights.properties.InstrumentationKey
+          value: applicationInsightsInstance.properties.InstrumentationKey
         }
         {
           name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
-          value: applicationInsights.properties.ConnectionString
+          value: applicationInsightsInstance.properties.ConnectionString
         }
         {
           name: 'ReviewApiUrl'
