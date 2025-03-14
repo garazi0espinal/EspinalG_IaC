@@ -29,7 +29,7 @@ stages:
         name: LintBicepCode
         displayName: Run Bicep linter
 
-- stage: DeployTest
+- stage: Test
   jobs:
   - template: pipeline-templates/deploy.yml
     parameters:
@@ -38,8 +38,8 @@ stages:
       resourceGroupName: rg-mazneu-cor-a-sandbox-espinalg-001
       serviceConnectionName: cor-sandbox-espinalg-001
 
-- stage: DeployProduction
-  dependsOn: DeployTest
+- stage: Production
+  dependsOn: Test
   jobs:
   - template: pipeline-templates/deploy.yml
     parameters:
