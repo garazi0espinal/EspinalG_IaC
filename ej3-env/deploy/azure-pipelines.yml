@@ -9,22 +9,16 @@ pool:
 
 stages:
 
-# Lint the Bicep file.
 - stage: Lint
-  jobs:
+  jobs: 
   - template: pipeline-templates/lint.yml
 
 # Deploy to the test environment.
-- stage: Test
-  jobs:
-  - template: pipeline-templates/deploy.yml
-    parameters:
-      environmentType: Test
+- template: pipeline-templates/deploy.yml
+  parameters:
+    environmentType: Test
 
 # Deploy to the production environment.
-- stage: Production
-  dependsOn: Test
-  jobs:
-  - template: pipeline-templates/deploy.yml
-    parameters:
-      environmentType: Production
+- template: pipeline-templates/deploy.yml
+  parameters:
+    environmentType: Production
