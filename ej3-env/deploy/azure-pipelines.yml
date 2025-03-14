@@ -9,7 +9,7 @@ pool:
 
   variables:
     ResourceGroupName: 'rg-mazneu-cor-a-sandbox-espinalg-001'
-    serviceConnectionName: cor-sandbox-espinalg-001
+    ServiceConnectionName: 'cor-sandbox-espinalg-001'
 
 stages:
 
