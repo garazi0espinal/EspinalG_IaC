@@ -14,6 +14,8 @@ variables:
   value: rg-mazneu-cor-a-sandbox-espinalg-001
 - name: AzureRegion
   value: westus3
+- name: TemplateSpecName
+  value: linux-app-service
 - name: TemplateSpecFilePath
   value: ej5/deploy/main.bicep
 
@@ -46,6 +48,7 @@ stages:
           inlineScript: |
             az ts create \
               --resource-group $(AzureResourceGroupName) \
+              --name $(TemplateSpecName) \
               --version $(Build.BuildNumber) \
               --template-file $(TemplateSpecFilePath) \
               --location $(AzureRegion) \
