@@ -5,25 +5,31 @@ parameters:
   type: string
   default: westus3
 
+variables:
+  - name: resourceGroupName
+    value: rg-mazneu-cor-a-sandbox-espinalg-001
+  - name: serviceConnectionName
+    value: cor-sandbox-espinalg-001
+
 stages:
 
 - ${{ if ne(parameters.environmentType, 'Production') }}:
-  - stage: Validate_${{parameters.environmentType}}
-    displayName: Validate (${{parameters.environmentType}} Environment)
+  - stage: Validate_${{ parameters.environmentType }}
+    displayName: Validate (${{ parameters.environmentType }} Environment)
     jobs:
     - job: ValidateBicepCode
       displayName: Validate Bicep code
       variables:
-      - group: ToyWebsite${{parameters.environmentType}}
+      - group: ToyWebsiteTest
       steps:
         - task: AzureResourceManagerTemplateDeployment@3
           name: RunPreflightValidation
           displayName: Run preflight validation
           inputs:
-            connectedServiceName: ToyWebsite${{parameters.environmentType}}
-            location: ${{parameters.deploymentDefaultLocation}}
+            connectedServiceName: $(serviceConnectionName)
+            location: $(deploymentDefaultLocation)
             deploymentMode: Validation
-            resourceGroupName: $(ResourceGroupName)
+            resourceGroupName: $(resourceGroupName)
             csmFile: ej3-env/deploy/main.bicep
             overrideParameters: >
               -environmentType $(EnvironmentType)
@@ -33,24 +39,24 @@ stages:
               -sqlServerAdministratorLoginPassword $(SqlServerAdministratorLoginPassword)
 
 - ${{ if eq(parameters.environmentType, 'Production') }}:
-  - stage: Preview_${{parameters.environmentType}}
-    displayName: Preview (${{parameters.environmentType}} Environment)
+  - stage: Preview_${{ parameters.environmentType }}
+    displayName: Preview (${{ parameters.environmentType }} Environment)
     jobs:
     - job: PreviewAzureChanges
       displayName: Preview Azure changes
       variables:
-      - group: ToyWebsite${{parameters.environmentType}}
+      - group: ToyWebsiteProduction
       steps:
         - task: AzureCLI@2
           name: RunWhatIf
           displayName: Run what-if
           inputs:
-            azureSubscription: ToyWebsite${{parameters.environmentType}}
+            azureSubscription: $(serviceConnectionName)
             scriptType: 'bash'
             scriptLocation: 'inlineScript'
             inlineScript: |
               az deployment group what-if \
-                --resource-group $(ResourceGroupName) \
+                --resource-group $(resourceGroupName) \
                 --template-file ej3-env/deploy/main.bicep \
                 --parameters environmentType=$(EnvironmentType) \
                              reviewApiUrl=$(ReviewApiUrl) \
@@ -58,16 +64,16 @@ stages:
                              sqlServerAdministratorLogin=$(SqlServerAdministratorLogin) \
                              sqlServerAdministratorLoginPassword=$(SqlServerAdministratorLoginPassword)
 
-- stage: Deploy_${{parameters.environmentType}}
-  displayName: Deploy (${{parameters.environmentType}} Environment)
+- stage: Deploy_${{ parameters.environmentType }}
+  displayName: Deploy (${{ parameters.environmentType }} Environment)
   jobs:
   - deployment: DeployWebsite
     displayName: Deploy website
     pool:
       vmImage: windows-latest
     variables:
-    - group: ToyWebsite${{parameters.environmentType}}
-    environment: ${{parameters.environmentType}}
+    - group: ToyWebsite${{ parameters.environmentType }}
+    environment: ${{ parameters.environmentType }}
     strategy:
       runOnce:
         deploy:
@@ -78,10 +84,10 @@ stages:
               name: DeployBicepFile
               displayName: Deploy Bicep file
               inputs:
-                connectedServiceName: ToyWebsite${{parameters.environmentType}}
+                connectedServiceName: $(serviceConnectionName)
                 deploymentName: $(Build.BuildNumber)
-                location: ${{parameters.deploymentDefaultLocation}}
-                resourceGroupName: $(ResourceGroupName)
+                location: $(deploymentDefaultLocation)
+                resourceGroupName: $(resourceGroupName)
                 csmFile: ej3-env/deploy/main.bicep
                 overrideParameters: >
                   -environmentType $(EnvironmentType)
@@ -109,8 +115,8 @@ stages:
               inputs:
                 appType: webApp
                 ConnectionType: AzureRM
-                azureSubscription: ToyWebsite${{parameters.environmentType}}
-                ResourceGroupName: $(ResourceGroupName)
+                azureSubscription: $(serviceConnectionName)
+                ResourceGroupName: $(resourceGroupName)
                 WebAppName: $(appServiceAppName)
                 Package: '$(Pipeline.Workspace)/website/publish.zip'
 
@@ -118,7 +124,7 @@ stages:
               name: DeploySqlDatabaseDacpac
               displayName: Deploy DACPAC to database
               inputs:
-                ConnectedServiceNameARM: ToyWebsite${{parameters.environmentType}}
+                ConnectedServiceNameARM: $(serviceConnectionName)
                 authenticationType: 'server'
                 serverName: $(sqlServerFullyQualifiedDomainName)
                 databaseName: $(sqlDatabaseName)
@@ -133,7 +139,7 @@ stages:
                 name: AddTestDataToDatabase
                 displayName: Add test data to database
                 inputs:
-                  ConnectedServiceNameARM: ToyWebsite${{parameters.environmentType}}
+                  ConnectedServiceNameARM: $(serviceConnectionName)
                   authenticationType: 'server'
                   serverName: $(sqlServerFullyQualifiedDomainName)
                   databaseName: $(sqlDatabaseName)
@@ -146,7 +152,7 @@ stages:
                 name: UploadSampleImages
                 displayName: Upload sample images
                 inputs:
-                  azureSubscription: ToyWebsite${{parameters.environmentType}}
+                  azureSubscription: $(serviceConnectionName)
                   scriptType: 'bash'
                   scriptLocation: 'inlineScript'
                   inlineScript: |
@@ -155,13 +161,13 @@ stages:
                       --destination $(storageAccountImagesBlobContainerName) \
                       --source 'deploy/sample-data/toyimages'
 
-- stage: SmokeTest_${{parameters.environmentType}}
-  displayName: Smoke Test (${{parameters.environmentType}} Environment)
+- stage: SmokeTest_${{ parameters.environmentType }}
+  displayName: Smoke Test (${{ parameters.environmentType }} Environment)
   jobs:
   - job: SmokeTest
     displayName: Smoke test
     variables:
-      appServiceAppHostName: $[ stageDependencies.Deploy_${{parameters.environmentType}}.DeployWebsite.outputs['DeployWebsite.SaveDeploymentOutputs.appServiceAppHostName'] ]
+      appServiceAppHostName: $[ stageDependencies.Deploy_${{ parameters.environmentType }}.DeployWebsite.outputs['DeployWebsite.SaveDeploymentOutputs.appServiceAppHostName'] ]
     steps:
       - task: PowerShell@2
         name: RunSmokeTests
