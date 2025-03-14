@@ -5,6 +5,12 @@ parameters:
   type: string
   default: westus3
 
+variables:
+  - name: resourceGroupName
+    value: rg-mazneu-cor-a-sandbox-espinalg-001
+  - name: serviceConnectionName
+    value: cor-sandbox-espinalg-001
+
 stages:
 
 - ${{ if ne(parameters.environmentType, 'Production') }}:
