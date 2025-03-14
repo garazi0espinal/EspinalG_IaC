@@ -26,7 +26,7 @@ stages:
     displayName: Lint code
     steps:
       - script: |
-          az bicep build --file ej2-lint/deploy/main.bicep
+          az bicep build --file ej3-env/deploy/main.bicep
         name: LintBicepCode
         displayName: Run Bicep linter
 
@@ -43,7 +43,7 @@ stages:
           location: $(deploymentDefaultLocation)
           deploymentMode: Validation
           resourceGroupName: $(ResourceGroupName)
-          csmFile: ej2-lint/deploy/main.bicep
+          csmFile: ej3-env/deploy/main.bicep
           overrideParameters: >
             -environmentType $(EnvironmentType)
 
@@ -62,7 +62,7 @@ stages:
           inlineScript: |
             az deployment group what-if \
               --resource-group $(ResourceGroupName) \
-              --template-file ej2-lint/deploy/main.bicep \
+              --template-file ej3-env/deploy/main.bicep \
               --parameters environmentType=$(EnvironmentType)
 
 - stage: Deploy
@@ -84,7 +84,7 @@ stages:
                 deploymentName: $(Build.BuildNumber)
                 location: $(deploymentDefaultLocation)
                 resourceGroupName: $(ResourceGroupName)
-                csmFile: ej2-lint/deploy/main.bicep
+                csmFile: ej3-env/deploy/main.bicep
                 overrideParameters: >
                   -environmentType $(EnvironmentType)
                 deploymentOutputs: deploymentOutputs
@@ -110,7 +110,7 @@ stages:
           targetType: inline
           script: |
             $container = New-PesterContainer `
-              -Path 'ej2-lint/deploy/Website.Tests.ps1' `
+              -Path 'ej3-env/deploy/Website.Tests.ps1' `
               -Data @{ HostName = '$(appServiceAppHostName)' }
             Invoke-Pester `
               -Container $container `
