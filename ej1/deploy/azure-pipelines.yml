@@ -1,27 +1,29 @@
-trigger: 
+trigger:
   batch: true
   branches:
     include:
-      - master
+    - master
 
 pool:
   vmImage: ubuntu-latest
 
-variables:
-  -name: deploymentDefaultLocation
-  value: East US
+stages:
 
-jobs:
-- job:
-  steps:
+# Lint the Bicep file.
+- stage: Lint
+  jobs: 
+  - template: pipeline-templates/lint.yml
 
-  - task: AzureResourceManagerTemplateDeployment@3
-    inputs:
-      connectedServiceName: $(ServiceConnectionName)
-      deploymentName: $(Build.BuildNumber)
-      location: $(deploymentDefaultLocation)
-      resourceGroupName: $(ResourceGroupName)
-      csmFile: deploy/main.bicep
-      overrideParameters: >
-        -environmentType $(EnvironmentType)
-        -deployToyManualsStorageAccount $(DeployToyManualsStorageAccount)
+# Deploy to the test environment.
+- template: pipeline-templates/deploy.yml
+  parameters:
+    environmentType: Test
+    resourceGroupName: ToyWebsiteTest
+    serviceConnectionName: ToyWebsiteTest
+
+# Deploy to the production environment.
+- template: pipeline-templates/deploy.yml
+  parameters:
+    environmentType: Production
+    resourceGroupName: ToyWebsiteProduction
+    serviceConnectionName: ToyWebsiteProduction
