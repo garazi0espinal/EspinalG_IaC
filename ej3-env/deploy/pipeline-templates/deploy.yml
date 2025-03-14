@@ -1,63 +1,62 @@
 parameters:
 - name: environmentType
   type: string
-- name: resourceGroupName
-  type: string
-- name: serviceConnectionName
-  type: string
 - name: deploymentDefaultLocation
   type: string
   default: westus3
 
 stages:
 
-// Validate
 - ${{ if ne(parameters.environmentType, 'Production') }}:
   - stage: Validate_${{parameters.environmentType}}
     displayName: Validate (${{parameters.environmentType}} Environment)
     jobs:
     - job: ValidateBicepCode
       displayName: Validate Bicep code
+      variables:
+      - group: ToyWebsite${{parameters.environmentType}}
       steps:
         - task: AzureResourceManagerTemplateDeployment@3
           name: RunPreflightValidation
           displayName: Run preflight validation
           inputs:
-            connectedServiceName: ${{parameters.serviceConnectionName}}
+            connectedServiceName: ToyWebsite${{parameters.environmentType}}
             location: ${{parameters.deploymentDefaultLocation}}
             deploymentMode: Validation
-            resourceGroupName: ${{parameters.resourceGroupName}}
+            resourceGroupName: $(ResourceGroupName)
             csmFile: ej3-env/deploy/main.bicep
             overrideParameters: >
-              -environmentType ${{parameters.environmentType}}
+              -environmentType $(EnvironmentType)
 
-// Preview
 - ${{ if eq(parameters.environmentType, 'Production') }}:
   - stage: Preview_${{parameters.environmentType}}
     displayName: Preview (${{parameters.environmentType}} Environment)
     jobs:
     - job: PreviewAzureChanges
       displayName: Preview Azure changes
+      variables:
+      - group: ToyWebsite${{parameters.environmentType}}
       steps:
         - task: AzureCLI@2
           name: RunWhatIf
           displayName: Run what-if
           inputs:
-            azureSubscription: ${{parameters.serviceConnectionName}}
+            azureSubscription: ToyWebsite${{parameters.environmentType}}
             scriptType: 'bash'
             scriptLocation: 'inlineScript'
             inlineScript: |
               az deployment group what-if \
-                --resource-group ${{parameters.resourceGroupName}} \
+                --resource-group $(ResourceGroupName) \
                 --template-file ej3-env/deploy/main.bicep \
-                --parameters environmentType=${{parameters.environmentType}}
+                --parameters environmentType=$(EnvironmentType)
 
-// Deploy
 - stage: Deploy_${{parameters.environmentType}}
   displayName: Deploy (${{parameters.environmentType}} Environment)
   jobs:
   - deployment: DeployWebsite
     displayName: Deploy website
+    variables:
+    - group: ToyWebsite${{parameters.environmentType}}
     environment: ${{parameters.environmentType}}
     strategy:
       runOnce:
@@ -69,13 +68,13 @@ stages:
               name: DeployBicepFile
               displayName: Deploy Bicep file
               inputs:
-                connectedServiceName: ${{parameters.serviceConnectionName}}
+                connectedServiceName: ToyWebsite${{parameters.environmentType}}
                 deploymentName: $(Build.BuildNumber)
                 location: ${{parameters.deploymentDefaultLocation}}
-                resourceGroupName: ${{parameters.resourceGroupName}}
+                resourceGroupName: $(ResourceGroupName)
                 csmFile: ej3-env/deploy/main.bicep
                 overrideParameters: >
-                  -environmentType ${{parameters.environmentType}}
+                  -environmentType $(EnvironmentType)
                 deploymentOutputs: deploymentOutputs
 
             - bash: |
@@ -85,7 +84,6 @@ stages:
               env:
                 DEPLOYMENT_OUTPUTS: $(deploymentOutputs)
 
-// Smoke Test
 - stage: SmokeTest_${{parameters.environmentType}}
   displayName: Smoke Test (${{parameters.environmentType}} Environment)
   jobs:
