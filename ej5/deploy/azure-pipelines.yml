@@ -10,7 +10,7 @@ trigger:
 variables:
 - name: ServiceConnectionName
   value: cor-sandbox-espinalg-001
-- name: AzureResourceGroupName
+- name: ResourceGroupName
   value: rg-mazneu-cor-a-sandbox-espinalg-001
 - name: AzureRegion
   value: westus3
@@ -47,7 +47,7 @@ stages:
           scriptLocation: 'inlineScript'
           inlineScript: |
             az ts create \
-              --resource-group $(AzureResourceGroupName) \
+              --resource-group $(ResourceGroupName) \
               --name $(TemplateSpecName) \
               --version $(Build.BuildNumber) \
               --template-file $(TemplateSpecFilePath) \
