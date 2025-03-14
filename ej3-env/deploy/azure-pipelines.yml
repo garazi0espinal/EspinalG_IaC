@@ -10,9 +10,7 @@ pool:
 variables:
   - name: deploymentDefaultLocation
     value: westus3
-
-  
-
+    
 stages:
 
 - stage: Lint
