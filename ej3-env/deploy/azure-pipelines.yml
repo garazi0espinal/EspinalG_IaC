@@ -10,11 +10,11 @@ pool:
 variables:
   - name: deploymentDefaultLocation
     value: westus3
-  - name: environmentType
+  - name: EnvironmentType
     value: nonprod
-  - name: resourceGroupName
+  - name: ResourceGroupName
     value: rg-mazneu-cor-a-sandbox-espinalg-001
-  - name: serviceConnectionName
+  - name: ServiceConnectionName
     value: cor-sandbox-espinalg-001
   
 
