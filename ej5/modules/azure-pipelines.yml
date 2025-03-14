@@ -15,7 +15,7 @@ variables:
 - name: ModuleName
   value: storage-account
 - name: ModuleRegistryServer
-  value: yourregistryname.azurecr.io
+  value: registryespinalg001.azurecr.io
 - name: ModuleFilePath
   value: ej5/modules/main.bicep
 - name: ModuleMetadataFilePath
