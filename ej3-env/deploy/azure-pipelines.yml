@@ -7,6 +7,9 @@ trigger:
 pool:
   vmImage: ubuntu-latest
 
+  variable:
+    name: ResourceGroupName+
+    value: 'rg-mazneu-cor-a-sandbox-espinalg-001'
 stages:
 
 - stage: Lint
