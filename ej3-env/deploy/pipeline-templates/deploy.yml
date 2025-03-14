@@ -27,6 +27,8 @@ stages:
             csmFile: ej3-env/deploy/main.bicep
             overrideParameters: >
               -environmentType $(EnvironmentType)
+              -reviewApiUrl $(ReviewApiUrl)
+              -reviewApiKey $(ReviewApiKey)
 
 - ${{ if eq(parameters.environmentType, 'Production') }}:
   - stage: Preview_${{parameters.environmentType}}
@@ -48,7 +50,9 @@ stages:
               az deployment group what-if \
                 --resource-group $(ResourceGroupName) \
                 --template-file ej3-env/deploy/main.bicep \
-                --parameters environmentType=$(EnvironmentType)
+                --parameters environmentType=$(EnvironmentType) \
+                             reviewApiUrl=$(ReviewApiUrl) \
+                             reviewApiKey=$(ReviewApiKey)
 
 - stage: Deploy_${{parameters.environmentType}}
   displayName: Deploy (${{parameters.environmentType}} Environment)
@@ -75,6 +79,8 @@ stages:
                 csmFile: ej3-env/deploy/main.bicep
                 overrideParameters: >
                   -environmentType $(EnvironmentType)
+                  -reviewApiUrl $(ReviewApiUrl)
+                  -reviewApiKey $(ReviewApiKey)
                 deploymentOutputs: deploymentOutputs
 
             - bash: |

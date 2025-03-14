@@ -15,6 +15,13 @@ param deployToyManualsStorageAccount bool = true
 @maxLength(13)
 param resourceNameSuffix string = uniqueString(resourceGroup().id)
 
+@description('The URL to the product review API.')
+param reviewApiUrl string
+
+@secure()
+@description('The API key to use when accessing the product review API.')
+param reviewApiKey string
+
 var appServiceAppName = 'toy-website-${resourceNameSuffix}'
 var appServicePlanName = 'toy-website'
 var applicationInsightsInstanceName = 'toywebsite'
@@ -74,7 +81,7 @@ resource applicationInsightsInstance 'Microsoft.Insights/components@2018-05-01-p
   }
 }
 
-resource appServiceApp 'Microsoft.Web/sites@2020-06-01' = {
+resource appServiceApp 'Microsoft.Web/sites@2022-03-01' = {
   name: appServiceAppName
   location: location
   properties: {
@@ -84,11 +91,19 @@ resource appServiceApp 'Microsoft.Web/sites@2020-06-01' = {
       appSettings: [
         {
           name: 'APPINSIGHTS_INSTRUMENTATIONKEY'
-          value: applicationInsightsInstance.properties.InstrumentationKey
+          value: applicationInsights.properties.InstrumentationKey
         }
         {
           name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
-          value: applicationInsightsInstance.properties.ConnectionString
+          value: applicationInsights.properties.ConnectionString
+        }
+        {
+          name: 'ReviewApiUrl'
+          value: reviewApiUrl
+        }
+        {
+          name: 'ReviewApiKey'
+          value: reviewApiKey
         }
       ]
     }
