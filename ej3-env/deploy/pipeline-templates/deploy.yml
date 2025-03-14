@@ -4,63 +4,36 @@ parameters:
 - name: deploymentDefaultLocation
   type: string
   default: westus3
+- name: resourceGroupName
+  type: string
+- name: serviceConnectionName
+  type: string
 
 stages:
 
-- ${{ if ne(parameters.environmentType, 'Production') }}:
-  - stage: Validate_${{parameters.environmentType}}
-    displayName: Validate (${{parameters.environmentType}} Environment)
-    jobs:
-    - job: ValidateBicepCode
-      displayName: Validate Bicep code
-      variables:
-      - group: ToyWebsite${{parameters.environmentType}}
-      steps:
-        - task: AzureResourceManagerTemplateDeployment@3
-          name: RunPreflightValidation
-          displayName: Run preflight validation
-          inputs:
-            connectedServiceName: ToyWebsite${{parameters.environmentType}}
-            location: ${{parameters.deploymentDefaultLocation}}
-            deploymentMode: Validation
-            resourceGroupName: $(ResourceGroupName)
-            csmFile: ej3-env/deploy/main.bicep
-            overrideParameters: >
-              -environmentType $(EnvironmentType)
-              -reviewApiUrl $(ReviewApiUrl)
-              -reviewApiKey $(ReviewApiKey)
-
-- ${{ if eq(parameters.environmentType, 'Production') }}:
-  - stage: Preview_${{parameters.environmentType}}
-    displayName: Preview (${{parameters.environmentType}} Environment)
-    jobs:
-    - job: PreviewAzureChanges
-      displayName: Preview Azure changes
-      variables:
-      - group: ToyWebsite${{parameters.environmentType}}
-      steps:
-        - task: AzureCLI@2
-          name: RunWhatIf
-          displayName: Run what-if
-          inputs:
-            azureSubscription: ToyWebsite${{parameters.environmentType}}
-            scriptType: 'bash'
-            scriptLocation: 'inlineScript'
-            inlineScript: |
-              az deployment group what-if \
-                --resource-group $(ResourceGroupName) \
-                --template-file ej3-env/deploy/main.bicep \
-                --parameters environmentType=$(EnvironmentType) \
-                             reviewApiUrl=$(ReviewApiUrl) \
-                             reviewApiKey=$(ReviewApiKey)
+- stage: Validate_${{parameters.environmentType}}
+  displayName: Validate (${{parameters.environmentType}} Environment)
+  jobs:
+  - job: ValidateBicepCode
+    displayName: Validate Bicep code
+    steps:
+      - task: AzureResourceManagerTemplateDeployment@3
+        name: RunPreflightValidation
+        displayName: Run preflight validation
+        inputs:
+          connectedServiceName: ${{parameters.serviceConnectionName}}
+          location: ${{parameters.deploymentDefaultLocation}}
+          deploymentMode: Validation
+          resourceGroupName: ${{parameters.resourceGroupName}}
+          csmFile: ej3-env/deploy/main.bicep
+          overrideParameters: >
+            -environmentType ${{parameters.environmentType}}
 
 - stage: Deploy_${{parameters.environmentType}}
   displayName: Deploy (${{parameters.environmentType}} Environment)
   jobs:
   - deployment: DeployWebsite
     displayName: Deploy website
-    variables:
-    - group: ToyWebsite${{parameters.environmentType}}
     environment: ${{parameters.environmentType}}
     strategy:
       runOnce:
@@ -72,15 +45,13 @@ stages:
               name: DeployBicepFile
               displayName: Deploy Bicep file
               inputs:
-                connectedServiceName: ToyWebsite${{parameters.environmentType}}
+                connectedServiceName: ${{parameters.serviceConnectionName}}
                 deploymentName: $(Build.BuildNumber)
                 location: ${{parameters.deploymentDefaultLocation}}
-                resourceGroupName: $(ResourceGroupName)
+                resourceGroupName: ${{parameters.resourceGroupName}}
                 csmFile: ej3-env/deploy/main.bicep
                 overrideParameters: >
-                  -environmentType $(EnvironmentType)
-                  -reviewApiUrl $(ReviewApiUrl)
-                  -reviewApiKey $(ReviewApiKey)
+                  -environmentType ${{parameters.environmentType}}
                 deploymentOutputs: deploymentOutputs
 
             - bash: |
