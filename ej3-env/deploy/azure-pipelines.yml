@@ -7,21 +7,43 @@ trigger:
 pool:
   vmImage: ubuntu-latest
 
+variables:
+  - name: deploymentDefaultLocation
+    value: westus3
+  - name: EnvironmentType
+    value: nonprod
+  - name: ResourceGroupName
+    value: rg-mazneu-cor-a-sandbox-espinalg-001
+  - name: ServiceConnectionName
+    value: cor-sandbox-espinalg-001
 
+stages:
 
-  stages:
+- stage: Lint
+  jobs:
+  - job: LintCode
+    displayName: Lint code
+    steps:
+      - script: |
+          az bicep build --file ej3-env/deploy/main.bicep
+        name: LintBicepCode
+        displayName: Run Bicep linter
 
-  # Lint the Bicep file.
-  - stage: Lint
-    jobs: 
-    - template: pipeline-templates/lint.yml
-
-  # Deploy to the test environment.
+- stage: DeployTest
+  jobs:
   - template: pipeline-templates/deploy.yml
     parameters:
       environmentType: Test
+      deploymentDefaultLocation: westus3
+      resourceGroupName: rg-mazneu-cor-a-sandbox-espinalg-001
+      serviceConnectionName: cor-sandbox-espinalg-001
 
-  # Deploy to the production environment.
+- stage: DeployProduction
+  dependsOn: DeployTest
+  jobs:
   - template: pipeline-templates/deploy.yml
     parameters:
       environmentType: Production
+      deploymentDefaultLocation: westus3
+      resourceGroupName: rg-mazneu-cor-a-sandbox-espinalg-001
+      serviceConnectionName: cor-sandbox-espinalg-001
