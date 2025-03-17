@@ -5,7 +5,7 @@ trigger:
     - master
   paths:
     include:
-    - 'modules/storage-account/**'
+    - 'modules/**'
 
 variables: 
 - name: ServiceConnectionName
