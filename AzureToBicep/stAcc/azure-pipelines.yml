@@ -5,7 +5,7 @@ pool:
   vmImage: 'ubuntu-latest'
 
 variables:
-  azureSubscription: 'cor-sandbox-espinalg-001'  # Nombre de la Service Connection en DevOps
+  azureSubscription: 'cor-sandbox-espinalg-001'  
   resourceGroupName: 'rg-mazneu-cor-a-sandbox-espinalg-001'  # Nombre del grupo de recursos en Azure
   location: 'northeurope'  # Ubicación donde se desplegarán los recursos
   bicepFile: 'main.bicep'  # Nombre del archivo Bicep
