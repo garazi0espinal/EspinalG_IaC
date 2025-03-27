@@ -1,0 +1,62 @@
+trigger:
+  branches:
+    include:
+      - main  # Cambia esto según la rama desde la que quieras que se ejecute el pipeline
+
+variables:
+  - name: ServiceConnectionName
+    value: cor-sandbox-espinalg-001
+  - name: ResourceGroupName
+    value: rg-mazneu-cor-a-sandbox-espinalg-001
+  - name: AzureRegion
+    value: westus3
+  - name: parametersFile
+    value: 'parameters-main.json'
+  - name: bicepFile
+    value: 'main.bicep'
+
+pool:
+  vmImage: ubuntu-latest
+
+stages:
+
+- stage: Lint
+  jobs:
+  - job: LintCode
+    displayName: Lint Bicep Code
+    steps:
+      - checkout: self  # Asegura que el código fuente se descarga
+
+      - script: |
+          ls -l $(System.DefaultWorkingDirectory)/AzureToBicep/stAcc  # Verifica archivos
+        displayName: "Verificar archivos en el agente"
+
+      - script: |
+          az bicep build --file $(System.DefaultWorkingDirectory)/$(bicepFile)
+        name: LintBicepCode
+        displayName: Run Bicep linter
+
+- stage: Publish
+  jobs:
+  - job: Publish
+    displayName: Deploy Bicep Template
+    steps:
+      - checkout: self  # Asegura que el código fuente se descarga
+
+      - script: |
+          ls -l $(System.DefaultWorkingDirectory)/AzureToBicep/stAcc  # Verifica archivos
+        displayName: "Verificar archivos en el agente"
+
+      - task: AzureCLI@2
+        name: Deploy
+        displayName: Deploy Bicep Template
+        inputs:
+          azureSubscription: $(ServiceConnectionName)
+          scriptType: 'bash'
+          scriptLocation: 'inlineScript'
+          inlineScript: |
+            az deployment group create \
+              --resource-group $(ResourceGroupName) \
+              --name "Deployment-$(Build.BuildId)" \
+              --template-file $(System.DefaultWorkingDirectory)/$(bicepFile) \
+              --parameters @$(System.DefaultWorkingDirectory)/$(parametersFile)
