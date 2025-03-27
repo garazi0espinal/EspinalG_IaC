@@ -1,0 +1,33 @@
+trigger:
+- master  # Se ejecuta en cada cambio en la rama main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  azureSubscription: 'cor-sandbox-espinalg-001'  
+  resourceGroupName: 'rg-mazneu-cor-a-sandbox-espinalg-001'  # Nombre del grupo de recursos en Azure
+  location: 'northeurope'  # Ubicación donde se desplegarán los recursos
+  bicepFile: 'AzureToBicep/stAcc/main.bicep'  # Nombre del archivo Bicep
+  parametersFile: 'AzureToBicep/stAcc/parameters-main.json'  # Archivo de parámetros JSON
+
+stages:
+- stage: DeployInfrastructure
+  displayName: 'Deploy Bicep to Azure'
+  jobs:
+  - job: Deploy
+    displayName: 'Deploy Bicep File'
+    steps:
+    
+    - task: AzureCLI@2
+      displayName: 'Deploy Bicep File to Azure'
+      inputs:
+        azureSubscription: $(azureSubscription)
+        scriptType: 'bash'
+        scriptLocation: 'inlineScript'
+        inlineScript: |
+          az group create --name $(resourceGroupName) --location $(location)
+          az deployment group create \
+            --resource-group $(resourceGroupName) \
+            --template-file $(bicepFile) \
+            --parameters @$(parametersFile)
