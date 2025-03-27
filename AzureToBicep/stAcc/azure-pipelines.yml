@@ -1,5 +1,11 @@
 trigger:
-- master  # Se ejecuta en cada cambio en la rama main
+  batch: true
+  branches:
+    include:
+    - master
+  paths:
+    include:
+    - AzureToBicep/stAcc/*
 
 pool:
   vmImage: 'ubuntu-latest'
