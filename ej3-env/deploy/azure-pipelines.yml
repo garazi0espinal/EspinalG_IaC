@@ -3,6 +3,9 @@ trigger:
   branches:
     include:
     - master
+  paths:
+    include:
+      - ej3-env/*
 
 pool:
   vmImage: ubuntu-latest

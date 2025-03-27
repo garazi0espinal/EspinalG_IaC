@@ -3,6 +3,9 @@ trigger:
   branches:
     include:
     - main
+  paths:
+    include:
+      - ej2-lint/*
 
 pool:
   vmImage: ubuntu-latest
