@@ -1,5 +1,5 @@
 trigger:
-- main  # Se ejecuta en cada cambio en la rama main
+- master  # Se ejecuta en cada cambio en la rama main
 
 pool:
   vmImage: 'ubuntu-latest'
