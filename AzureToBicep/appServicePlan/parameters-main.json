@@ -3,7 +3,7 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "serverfarms_name": {
-            "value": "app0service0plan"
+            "value": "app1service1plan"
         },
         "location" : {
             "value": "northeurope"
