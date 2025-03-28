@@ -3,7 +3,10 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "serverfarms_name": {
-            "value": "service1plan1espinalg"
+            "value": "app0service0plan"
+        },
+        "location" : {
+            "value": "East US"
         }
     }
 }

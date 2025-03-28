@@ -1,8 +1,9 @@
-param serverfarms_name string = 'WestUS2Plan'
+param serverfarms_name string
+param location string
 
 resource serverfarms 'Microsoft.Web/serverfarms@2024-04-01' = {
   name: serverfarms_name
-  location: 'West US 2'
+  location: location
   sku: {
     name: 'Y1'
     tier: 'Dynamic'

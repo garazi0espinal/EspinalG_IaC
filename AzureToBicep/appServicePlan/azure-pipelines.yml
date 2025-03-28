@@ -14,7 +14,6 @@ pool:
 variables:
   azureSubscription: 'cor-sandbox-espinalg-001'  
   resourceGroupName: 'rg-mazneu-cor-a-sandbox-espinalg-001'  # Nombre del grupo de recursos en Azure
-  location: 'northeurope'  # Ubicación donde se desplegarán los recursos
   bicepFile: 'AzureToBicep/appServicePlan/main.bicep'  # Nombre del archivo Bicep
   parametersFile: 'AzureToBicep/appServicePlan/parameters-main.json'  # Archivo de parámetros JSON
 
